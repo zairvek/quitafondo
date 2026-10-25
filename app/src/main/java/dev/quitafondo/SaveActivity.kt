@@ -128,10 +128,10 @@ class SaveActivity : AppCompatActivity() {
         backgrounds.setOnCheckedStateChangeListener { _, ids ->
             val id = ids.firstOrNull() ?: return@setOnCheckedStateChangeListener
             when (id) {
-                R.id.bgTransparent -> setBackground(Background.TRANSPARENT, id)
-                R.id.bgWhite -> { solidColor = color(R.color.backdrop_white); setBackground(Background.SOLID, id) }
-                R.id.bgBlack -> { solidColor = color(R.color.backdrop_black); setBackground(Background.SOLID, id) }
-                R.id.bgBlur -> setBackground(Background.BLUR, id)
+                R.id.bgTransparent -> chooseBackground(Background.TRANSPARENT, id)
+                R.id.bgWhite -> { solidColor = color(R.color.backdrop_white); chooseBackground(Background.SOLID, id) }
+                R.id.bgBlack -> { solidColor = color(R.color.backdrop_black); chooseBackground(Background.SOLID, id) }
+                R.id.bgBlur -> chooseBackground(Background.BLUR, id)
                 R.id.bgColor -> showColorPicker()
                 R.id.bgPhoto -> photoPicker.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
@@ -162,7 +162,7 @@ class SaveActivity : AppCompatActivity() {
         return v
     }
 
-    private fun setBackground(bg: Background, chipId: Int) {
+    private fun chooseBackground(bg: Background, chipId: Int) {
         bgMode = bg
         previousChip = chipId
         updatePreviewBackdrop()
@@ -201,8 +201,9 @@ class SaveActivity : AppCompatActivity() {
                     setMargins(margin, margin, margin, margin)
                 }
                 setOnClickListener {
-                    solidColor = c
-                    setBackground(Background.SOLID, R.id.bgColor)
+                    // Con nombre explícito: la vista también tiene una propiedad "solidColor".
+                    this@SaveActivity.solidColor = c
+                    chooseBackground(Background.SOLID, R.id.bgColor)
                     dialog.dismiss()
                 }
             }
@@ -221,7 +222,7 @@ class SaveActivity : AppCompatActivity() {
                 .onSuccess { bmp ->
                     photo?.recycle()
                     photo = bmp
-                    setBackground(Background.PHOTO, R.id.bgPhoto)
+                    chooseBackground(Background.PHOTO, R.id.bgPhoto)
                 }
                 .onFailure {
                     working.visibility = View.INVISIBLE
