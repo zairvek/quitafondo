@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Quitafondo" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/accent_on</item>
+        <item name="colorPrimaryContainer">@color/accent_container</item>
+        <item name="colorOnPrimaryContainer">@color/accent_on_container</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="colorSecondaryContainer">@color/accent_container</item>
+        <item name="colorOnSecondaryContainer">@color/accent_on_container</item>
+        <item name="colorSurface">@color/ink_900</item>
+        <item name="colorOnSurface">@color/paper</item>
+        <item name="colorOnSurfaceVariant">@color/ink_300</item>
+        <item name="colorOutline">@color/ink_500</item>
+        <item name="colorError">@color/error</item>
+        <item name="android:colorBackground">@color/ink_950</item>
+        <item name="android:windowBackground">@color/ink_950</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Quitafondo.ToolButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="iconGravity">top</item>
+        <item name="iconPadding">2dp</item>
+        <item name="iconSize">22dp</item>
+        <item name="android:textSize">@dimen/text_tool</item>
+        <item name="android:minHeight">@dimen/tool_button_height</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="Quitafondo.IconButton" parent="Widget.Material3.Button.IconButton">
+        <item name="iconTint">@color/paper</item>
+        <item name="iconSize">24dp</item>
+    </style>
+
+    <style name="Quitafondo.SliderLabel" parent="">
+        <item name="android:layout_width">@dimen/slider_label_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/text_small</item>
+        <item name="android:textColor">@color/ink_300</item>
+    </style>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tokens de color. Las vistas y los layouts solo usan estos nombres. -->
+    <color name="ink_950">#0E1013</color>
+    <color name="ink_900">#15181C</color>
+    <color name="ink_800">#1E2228</color>
+    <color name="ink_700">#2B3038</color>
+    <color name="ink_500">#5C6470</color>
+    <color name="ink_300">#A3AAB5</color>
+    <color name="paper">#F3F0E9</color>
+
+    <color name="accent">#FF7A52</color>
+    <color name="accent_on">#2A0E04</color>
+    <color name="accent_container">#5A2A1A</color>
+    <color name="accent_on_container">#FFD9CC</color>
+    <color name="error">#FF8A80</color>
+
+    <color name="checker_light">#FFFFFF</color>
+    <color name="checker_dark">#D5D7DB</color>
+    <color name="backdrop_gray">#7A7F87</color>
+    <color name="backdrop_black">#000000</color>
+    <color name="backdrop_white">#FFFFFF</color>
+
+    <color name="cursor_ring">#FFFFFF</color>
+    <color name="cursor_shadow">#B3000000</color>
+    <color name="cursor_target">#FF7A52</color>
+    <color name="crop_dim">#B30E1013</color>
+    <color name="crop_line">#FFFFFF</color>
+    <color name="crop_grid">#66FFFFFF</color>
+    <color name="scrim">#CC0E1013</color>
+
+    <color name="launcher_bg">#FF7A52</color>
+</resources>

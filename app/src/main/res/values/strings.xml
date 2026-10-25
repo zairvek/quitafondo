@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quitafondo</string>
+
+    <!-- Inicio -->
+    <string name="home_title">Recorta cualquier cosa de una foto</string>
+    <string name="home_subtitle">Borra el fondo y guarda un PNG transparente para pegatinas, montajes o tu tienda.</string>
+    <string name="home_pick">Elegir foto</string>
+    <string name="home_step_1">1. Elige una foto y encuadra lo que quieres.</string>
+    <string name="home_step_2">2. Borra el fondo con el dedo. Mágico y Color hacen casi todo solos.</string>
+    <string name="home_step_3">3. Suaviza el borde y guarda.</string>
+    <string name="loading_photo">Abriendo la foto…</string>
+    <string name="error_load">No pude abrir esa foto. Prueba con otra.</string>
+    <string name="error_memory">La foto es demasiado grande para este teléfono.</string>
+
+    <!-- Comunes -->
+    <string name="back">Atrás</string>
+    <string name="done">Listo</string>
+    <string name="session_lost">La sesión se cerró. Elige la foto otra vez.</string>
+
+    <!-- Recorte -->
+    <string name="crop_title">Encuadra</string>
+    <string name="crop_hint">Arrastra las esquinas o mueve el marco. Cuanto más ajustado, menos fondo que borrar.</string>
+    <string name="crop_reset">Toda la foto</string>
+    <string name="preparing">Preparando…</string>
+
+    <!-- Editor -->
+    <string name="undo">Deshacer</string>
+    <string name="redo">Rehacer</string>
+    <string name="backdrop">Cambiar fondo de contraste</string>
+    <string name="tool_manual">Borrar</string>
+    <string name="tool_magic">Mágico</string>
+    <string name="tool_color">Color</string>
+    <string name="tool_repair">Reparar</string>
+    <string name="tool_person">Persona</string>
+    <string name="slider_size">Tamaño</string>
+    <string name="slider_offset">Distancia</string>
+    <string name="slider_tolerance">Parecido</string>
+    <string name="finding_edges">Buscando bordes…</string>
+    <string name="finding_person">Buscando a la persona…</string>
+    <string name="no_person">No encontré a nadie en la foto. Prueba con Mágico o Color.</string>
+    <string name="person_failed">No se pudo hacer el recorte automático.</string>
+    <string name="discard_title">¿Salir del editor?</string>
+    <string name="discard_message">Perderás lo que borraste en esta foto.</string>
+    <string name="discard_yes">Salir</string>
+    <string name="discard_no">Seguir editando</string>
+    <string name="hint_manual">Pasa el dedo para borrar. El círculo va por encima del dedo.</string>
+    <string name="hint_magic">Pasa el borde del círculo por el fondo: se detiene en los bordes del objeto.</string>
+    <string name="hint_color">Empieza sobre el fondo: borra los colores parecidos al primero que tocas.</string>
+    <string name="hint_repair">Pasa el dedo por donde quieras recuperar la foto.</string>
+    <string name="hint_zoom">Dos dedos para acercar y moverte.</string>
+
+    <!-- Guardar -->
+    <string name="save_title">Guardar</string>
+    <string name="smooth_edge">Suavizar</string>
+    <string name="trim">Quitar el espacio vacío alrededor</string>
+    <string name="format_png">PNG transparente</string>
+    <string name="format_jpg">JPG con fondo blanco</string>
+    <string name="save">Guardar en Imágenes</string>
+    <string name="saving">Guardando…</string>
+    <string name="nothing_left">No queda nada visible. Vuelve y repara una parte.</string>
+    <string name="saved_title">Guardada</string>
+    <string name="saved_message">Está en Imágenes › Quitafondo.\n\nAlgunas galerías muestran la transparencia en negro: la imagen está bien. Ábrela en otra app para comprobarlo.</string>
+    <string name="share">Compartir</string>
+    <string name="new_photo">Nueva foto</string>
+    <string name="keep_editing">Seguir editando</string>
+    <string name="error_save">No se pudo guardar. Revisa que haya espacio libre.</string>
+    <string name="share_chooser">Compartir recorte</string>
+</resources>

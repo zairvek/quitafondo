@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ink_900">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bar_height"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_xs">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/back"
+            style="@style/Quitafondo.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/back"
+            app:icon="@drawable/ic_back" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/undo"
+            style="@style/Quitafondo.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/undo"
+            app:icon="@drawable/ic_undo" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/redo"
+            style="@style/Quitafondo.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/redo"
+            app:icon="@drawable/ic_redo" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backdrop"
+            style="@style/Quitafondo.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/backdrop"
+            app:icon="@drawable/ic_backdrop" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_xs"
+            android:layout_marginEnd="@dimen/space_s"
+            android:text="@string/done" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <dev.quitafondo.view.EraserView
+            android:id="@+id/eraser"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_margin="@dimen/space_s"
+            android:background="@color/scrim"
+            android:paddingHorizontal="@dimen/space_m"
+            android:paddingVertical="@dimen/space_s"
+            android:textColor="@color/paper"
+            android:textSize="@dimen/text_small" />
+
+    </FrameLayout>
+
+    <include
+        android:id="@+id/rowSize"
+        layout="@layout/view_slider_row" />
+
+    <include
+        android:id="@+id/rowOffset"
+        layout="@layout/view_slider_row" />
+
+    <include
+        android:id="@+id/rowTolerance"
+        layout="@layout/view_slider_row" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_s"
+        android:paddingVertical="@dimen/space_s">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/tools"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toolManual"
+                style="@style/Quitafondo.ToolButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tool_manual"
+                app:icon="@drawable/ic_tool_manual" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toolMagic"
+                style="@style/Quitafondo.ToolButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tool_magic"
+                app:icon="@drawable/ic_tool_magic" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toolColor"
+                style="@style/Quitafondo.ToolButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tool_color"
+                app:icon="@drawable/ic_tool_color" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toolRepair"
+                style="@style/Quitafondo.ToolButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tool_repair"
+                app:icon="@drawable/ic_tool_repair" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toolPerson"
+            style="@style/Quitafondo.ToolButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_s"
+            android:layout_weight="1"
+            android:text="@string/tool_person"
+            app:icon="@drawable/ic_tool_person" />
+    </LinearLayout>
+</LinearLayout>
+
+    <!-- Cubre toda la pantalla para que nada se pueda tocar durante un cálculo. -->
+    <include
+        android:id="@+id/progress"
+        layout="@layout/view_progress"
+        android:visibility="gone" />
+</FrameLayout>

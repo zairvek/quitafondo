@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_s">8dp</dimen>
+    <dimen name="space_m">16dp</dimen>
+    <dimen name="space_l">24dp</dimen>
+    <dimen name="space_xl">40dp</dimen>
+
+    <dimen name="bar_height">56dp</dimen>
+    <dimen name="tool_button_height">60dp</dimen>
+    <dimen name="slider_label_width">96dp</dimen>
+    <dimen name="text_tool">11sp</dimen>
+    <dimen name="text_small">13sp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_title">28sp</dimen>
+
+    <dimen name="checker_tile">10dp</dimen>
+    <dimen name="canvas_padding">12dp</dimen>
+    <dimen name="cursor_stroke">2dp</dimen>
+    <dimen name="cursor_shadow_stroke">4dp</dimen>
+    <dimen name="cursor_dot">3dp</dimen>
+    <dimen name="crop_handle">14dp</dimen>
+    <dimen name="crop_touch_slop">32dp</dimen>
+    <dimen name="crop_min_size">48dp</dimen>
+    <dimen name="crop_line">2dp</dimen>
+    <dimen name="crop_grid_line">1dp</dimen>
+</resources>

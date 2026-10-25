@@ -1,0 +1,29 @@
+feature,area,priority,original,clone,notes
+Load photo from gallery,input,must,yes,yes,System Photo Picker; no permissions needed. Also accepts Share > Quitafondo
+Crop before editing,input,must,yes,yes,CropView: corners; edges; move frame; reset to full photo
+Checkerboard transparency canvas,editor,must,yes,yes,Checker tile fixed size on screen
+Manual erase brush,editor,must,yes,yes,Tool.MANUAL
+Magic mode (edge-detect erase),editor,must,yes,yes,Sobel edge map + flood fill bounded by brush circle; computed once per photo
+Color/Auto mode (similar-pixel erase),editor,must,yes,yes,Samples color at stroke start; erases similar pixels inside brush
+Repair mode (restore erased area),editor,must,yes,yes,Restores original alpha (keeps already-transparent PNG areas transparent)
+Cursor size slider,editor,must,yes,yes,4-80 dp radius; live preview while sliding
+Cursor offset from finger,editor,must,yes,yes,0-150 dp above finger with guide line
+Undo,editor,must,yes,yes,Dirty-rect diffs; 48 MB cap
+Redo,editor,must,yes,yes,Cleared by any new change
+Pinch zoom and pan,editor,must,yes,yes,Two fingers; second finger cancels the stroke in progress; up to 20x
+Background brightness/color control,editor,should,yes,yes,Cycles checker / white / gray / black
+Tolerance control for Color/Magic,editor,should,yes,yes,0-100 'Parecido' slider; visible only for those tools
+Auto-Selfie one-tap person cutout,editor,should,yes,yes,ML Kit Selfie Segmentation (bundled; offline); merged as one undoable step
+Smooth Edge slider,export,must,yes,yes,Separable box blur x2 on alpha; radius scales with image size
+Save as PNG with transparency,export,must,yes,yes,MediaStore Pictures/Quitafondo
+Save as JPEG with white background,export,could,partial,yes,Format toggle on save screen
+Share / open with other app,export,should,yes,yes,Android share sheet after saving
+Saved confirmation + FAQ hint about black background in Gallery,export,should,yes,yes,Dialog text after saving
+Progress indicator for Magic/Auto-Selfie/Save,editor,must,yes,yes,Full-screen scrim with spinner and text
+Error handling: cannot load / cannot save,editor,must,yes,yes,Toasts for load error; out of memory; save error; lost session
+Extract mode with blue/red markers (GrabCut-style),editor,could,legacy,no,Not built
+EXIF orientation handling,input,must,yes,yes,ImageDecoder applies EXIF rotation
+Trim empty space around result,export,could,no,yes,Clone extra; on by default
+Ads (banner + interstitial after save),monetization,skip,yes,no,Not cloned; learning project
+"Links to sibling apps (PhotoLayers, Stickers, Album)",marketing,skip,yes,no,Developer's own products; not cloned
+Brand name/icon/store screenshots,brand,skip,yes,no,Clone uses its own name and icon

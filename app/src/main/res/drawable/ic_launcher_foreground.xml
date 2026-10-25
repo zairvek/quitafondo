@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Tablero 4x4 (30..78) dentro de la zona segura del icono adaptable. -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M30,30 H78 V78 H30 Z" />
+    <path android:fillColor="#FFD5D7DB"
+        android:pathData="M42,30 H54 V42 H42 Z M66,30 H78 V42 H66 Z M30,42 H42 V54 H30 Z M54,42 H66 V54 H54 Z M42,54 H54 V66 H42 Z M66,54 H78 V66 H66 Z M30,66 H42 V78 H30 Z M54,66 H66 V78 H54 Z" />
+    <!-- Figura recortada: una gota oscura que sobresale del tablero. -->
+    <path android:fillColor="#FF15181C"
+        android:pathData="M54,20 C54,20 36,42 36,58 A18,18 0 0 0 72,58 C72,42 54,20 54,20 Z" />
+</vector>
