@@ -15,20 +15,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Pruebas del motor
+      - name: Pruebas del motor y APK
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testDebugUnitTest
+          set -o pipefail
+          ./gradlew --no-daemon --console=plain testDebugUnitTest assembleDebug 2>&1 | tee registro.txt
 
-      - name: Compilar APK
-        run: ./gradlew --no-daemon assembleDebug
+      - name: Publicar el registro si algo falló
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Guarda las últimas líneas del registro y los informes de pruebas en un release
+          # aparte, para poder leerlos sin entrar a la página de Actions.
+          { echo "== commit ${{ github.sha }} =="; grep -n "^e: \|error:\|FAILED\|What went wrong\|Exception\|expected" registro.txt | head -80; echo; tail -150 registro.txt; } > fallo.txt
+          find app/build/test-results -name "*.xml" -exec grep -l "<failure" {} \; 2>/dev/null | head -5 | xargs -r -I{} sh -c 'echo "== {} =="; head -c 4000 "{}"' >> fallo.txt
+          gh release delete registro --yes --cleanup-tag || true
+          gh release create registro fallo.txt --target "${{ github.sha }}" --title "Registro del último fallo" --notes "Solo para depurar." --prerelease
 
       - uses: actions/upload-artifact@v4
         with:
