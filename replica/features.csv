@@ -13,7 +13,7 @@ Redo,editor,must,yes,yes,Cleared by any new change
 Pinch zoom and pan,editor,must,yes,yes,Two fingers; second finger cancels the stroke in progress; up to 20x
 Background brightness/color control,editor,should,yes,yes,Cycles checker / white / gray / black
 Tolerance control for Color/Magic,editor,should,yes,yes,0-100 'Parecido' slider; visible only for those tools
-Auto-Selfie one-tap person cutout,editor,should,yes,yes,ML Kit Selfie Segmentation (bundled; offline); merged as one undoable step
+Auto-Selfie one-tap person cutout,editor,should,yes,yes,"Auto" button: ML Kit Subject Segmentation (any object) with Selfie Segmentation fallback; one undoable step
 Smooth Edge slider,export,must,yes,yes,Separable box blur x2 on alpha; radius scales with image size
 Save as PNG with transparency,export,must,yes,yes,MediaStore Pictures/Quitafondo
 Save as JPEG with white background,export,could,partial,yes,Format toggle on save screen
@@ -24,6 +24,9 @@ Error handling: cannot load / cannot save,editor,must,yes,yes,Toasts for load er
 Extract mode with blue/red markers (GrabCut-style),editor,could,legacy,no,Not built
 EXIF orientation handling,input,must,yes,yes,ImageDecoder applies EXIF rotation
 Trim empty space around result,export,could,no,yes,Clone extra; on by default
+Magnifier while drawing,editor,could,no,yes,Clone extra
+Background replacement (solid/blur/photo),export,could,no,yes,Clone extra; the original needs a second app for this
+Sticker outline,export,could,no,yes,Clone extra; white outline with adjustable width
 Ads (banner + interstitial after save),monetization,skip,yes,no,Not cloned; learning project
 "Links to sibling apps (PhotoLayers, Stickers, Album)",marketing,skip,yes,no,Developer's own products; not cloned
 Brand name/icon/store screenshots,brand,skip,yes,no,Clone uses its own name and icon

@@ -89,6 +89,92 @@ object ImageOps {
     }
 
     /**
+     * Engorda la máscara [radius] píxeles aproximadamente, con el borde exterior suave.
+     * Sirve para el contorno de pegatina: lo que queda dentro de la versión engordada
+     * pero fuera de la máscara original es el borde.
+     */
+    fun dilateMask(mask: ByteArray, w: Int, h: Int, radius: Int): ByteArray {
+        if (radius <= 0) return mask.copyOf()
+        // El desenfoque doble llega a ~2r; subir la ganancia convierte casi todo en opaco
+        // y deja una rampa corta por fuera.
+        val blurred = smoothMask(mask, w, h, radius)
+        return ByteArray(mask.size) {
+            val v = (blurred[it].toInt() and 0xFF) * 6
+            v.coerceAtMost(255).toByte()
+        }
+    }
+
+    /** Desenfoque de los canales RGB (el alfa queda en 255). Pensado para imágenes reducidas. */
+    fun blurRgb(argb: IntArray, w: Int, h: Int, radius: Int): IntArray {
+        if (radius <= 0) return IntArray(argb.size) { argb[it] or (0xFF shl 24) }
+        val out = IntArray(argb.size) { 0xFF shl 24 }
+        val chan = IntArray(w * h)
+        val tmp = IntArray(w * h)
+        for (shift in intArrayOf(16, 8, 0)) {
+            for (i in chan.indices) chan[i] = (argb[i] shr shift) and 0xFF
+            repeat(2) {
+                boxBlurH(chan, tmp, w, h, radius)
+                boxBlurV(tmp, chan, w, h, radius)
+            }
+            for (i in chan.indices) out[i] = out[i] or (chan[i].coerceIn(0, 255) shl shift)
+        }
+        return out
+    }
+
+    /**
+     * Pone el color [srcRgb] con opacidad [srcA] (0..255) encima de [dst], ambos ARGB sin premultiplicar.
+     * Devuelve ARGB sin premultiplicar, que es lo que esperan los bitmaps de Android.
+     */
+    fun over(dst: Int, srcRgb: Int, srcA: Int): Int {
+        if (srcA >= 255) return (0xFF shl 24) or (srcRgb and 0x00FFFFFF)
+        if (srcA <= 0) return dst
+        val da = dst ushr 24
+        if (da == 0) return (srcA shl 24) or (srcRgb and 0x00FFFFFF)
+        // alfa resultante = sa + da * (1 - sa)
+        val outA = srcA + da * (255 - srcA) / 255
+        fun ch(shift: Int): Int {
+            val s = (srcRgb shr shift) and 0xFF
+            val d = (dst shr shift) and 0xFF
+            // color = (s*sa + d*da*(1-sa)) / outA
+            val num = s * srcA * 255 + d * da * (255 - srcA)
+            return (num / (outA * 255)).coerceIn(0, 255)
+        }
+        return (outA shl 24) or (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
+    }
+
+    /**
+     * Compone el resultado final de [rect]: fondo (si lo hay), borde de pegatina (si lo hay)
+     * y encima la foto con la máscara [mask]. Devuelve un arreglo del tamaño de [rect].
+     *
+     * @param background píxeles ARGB del tamaño de [rect], o null para fondo transparente
+     * @param outline máscara engordada del tamaño de la imagen completa, o null si no hay borde
+     */
+    fun render(
+        s: EditorState,
+        mask: ByteArray,
+        rect: IntRect,
+        background: IntArray?,
+        outline: ByteArray?,
+        outlineRgb: Int,
+    ): IntArray {
+        val rw = rect.width
+        val out = IntArray(rw * rect.height)
+        var o = 0
+        for (y in rect.top until rect.bottom) {
+            var i = y * s.width + rect.left
+            for (x in rect.left until rect.right) {
+                var px = background?.get(o) ?: 0
+                if (outline != null) px = over(px, outlineRgb, outline[i].toInt() and 0xFF)
+                px = over(px, s.original[i], mask[i].toInt() and 0xFF)
+                out[o] = px
+                o++
+                i++
+            }
+        }
+        return out
+    }
+
+    /**
      * Convierte la confianza del modelo de segmentación (0..1 por píxel) en alfa,
      * con una rampa suave entre [low] y [high] para no dejar bordes dentados.
      */

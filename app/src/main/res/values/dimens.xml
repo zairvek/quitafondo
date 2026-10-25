@@ -24,4 +24,7 @@
     <dimen name="crop_min_size">48dp</dimen>
     <dimen name="crop_line">2dp</dimen>
     <dimen name="crop_grid_line">1dp</dimen>
+
+    <dimen name="magnifier_radius">60dp</dimen>
+    <dimen name="magnifier_border">2dp</dimen>
 </resources>

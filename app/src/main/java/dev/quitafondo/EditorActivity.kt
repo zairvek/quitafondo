@@ -85,7 +85,7 @@ class EditorActivity : AppCompatActivity() {
             if (isChecked) selectTool(toolFor(checkedId), showHint = true)
         }
 
-        findViewById<View>(R.id.toolPerson).setOnClickListener { runPersonCutout() }
+        findViewById<View>(R.id.toolAuto).setOnClickListener { runAutoCutout() }
         findViewById<View>(R.id.backdrop).setOnClickListener {
             Session.backdrop = Session.backdrop.next()
             eraser.backdrop = Session.backdrop
@@ -94,7 +94,11 @@ class EditorActivity : AppCompatActivity() {
         redo.setOnClickListener { eraser.redo() }
         findViewById<View>(R.id.back).setOnClickListener { confirmExit() }
         findViewById<View>(R.id.done).setOnClickListener {
-            startActivity(Intent(this, SaveActivity::class.java))
+            lifecycleScope.launch {
+                // Deja que el hilo de trazos termine lo encolado antes de leer la máscara en Guardar.
+                eraser.awaitIdle()
+                startActivity(Intent(this@EditorActivity, SaveActivity::class.java))
+            }
         }
         onBackPressedDispatcher.addCallback(this) { confirmExit() }
 
@@ -182,25 +186,30 @@ class EditorActivity : AppCompatActivity() {
         hint.postDelayed(hideHint, 3500)
     }
 
-    private fun runPersonCutout() {
+    private fun runAutoCutout() {
         if (personRunning) return
         personRunning = true
-        setBusy(true, R.string.finding_person)
+        setBusy(true, R.string.finding_subject)
         lifecycleScope.launch {
             val result = try {
-                resultOf { withContext(Dispatchers.Default) { AutoCutout.personMask(state) } }
+                eraser.awaitIdle()
+                resultOf { withContext(Dispatchers.Default) { AutoCutout.cutout(state) } }
             } finally {
                 personRunning = false
                 setBusy(false)
             }
             result
-                .onSuccess { mask ->
-                    if (mask == null) {
-                        toast(R.string.no_person)
-                    } else {
-                        state.replaceMask(mask)
-                        eraser.refresh(state.fullRect)
-                        updateHistoryButtons()
+                .onSuccess { outcome ->
+                    val mask = outcome.mask
+                    when {
+                        mask == null && outcome.model == AutoCutout.Model.SUBJECT -> toast(R.string.no_subject)
+                        mask == null -> toast(R.string.no_person)
+                        else -> {
+                            state.replaceMask(mask)
+                            eraser.refresh(state.fullRect)
+                            updateHistoryButtons()
+                            if (outcome.model == AutoCutout.Model.PERSON) toast(R.string.model_fallback)
+                        }
                     }
                 }
                 .onFailure { toast(R.string.person_failed) }

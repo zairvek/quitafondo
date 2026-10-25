@@ -31,6 +31,11 @@
             </intent-filter>
         </activity>
 
+        <!-- Pide a Google Play Services que descargue el modelo de objetos al instalar la app. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="subject_segment" />
+
         <activity android:name=".CropActivity" android:exported="false" />
         <activity android:name=".EditorActivity" android:exported="false" />
         <activity android:name=".SaveActivity" android:exported="false" />

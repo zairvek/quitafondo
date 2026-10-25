@@ -11,10 +11,10 @@ App de Android para quitar el fondo de una foto y guardarla como PNG transparent
    - **Mágico**: borra la zona parecida al centro del círculo y se detiene en los bordes del objeto.
    - **Color**: borra, dentro del círculo, los colores parecidos al primero que tocas.
    - **Reparar**: devuelve la foto original donde pasas el dedo.
-   - **Persona**: recorta a una persona de un toque (funciona sin internet).
-4. Ajustes del pincel: **Tamaño**, **Distancia** (el círculo va por encima del dedo para que no lo tape) y **Parecido** (en Mágico y Color).
+   - **Auto**: recorta el objeto principal de un toque, sea lo que sea. Si el modelo de objetos aún no se ha descargado en el teléfono, usa el de personas, que va dentro de la app.
+4. Ajustes del pincel: **Tamaño**, **Distancia** (el círculo va por encima del dedo para que no lo tape) y **Parecido** (en Mágico y Color). Mientras dibujas, una **lupa** en la esquina muestra ampliado lo que hay bajo el pincel.
 5. **Dos dedos** para acercar y moverte. **Deshacer** y **Rehacer** arriba. El botón de medio círculo cambia el fondo de contraste (tablero, blanco, gris, negro) para ver restos.
-6. **Guardar**: suaviza el borde, quita el espacio vacío si quieres, elige PNG transparente o JPG con fondo blanco. Se guarda en *Imágenes › Quitafondo* y puedes compartirla.
+6. **Guardar**: elige el **fondo** (transparente, blanco, negro, un color, la misma foto desenfocada u otra foto), suaviza el borde, añade un **borde de pegatina** si quieres, quita el espacio vacío y elige PNG o JPG. Se guarda en *Imágenes › Quitafondo* y puedes compartirla.
 
 ## Cómo instalarla en tu teléfono
 
@@ -67,7 +67,7 @@ app/src/main/java/dev/quitafondo/
   CropActivity     recorte
   EditorActivity   editor con herramientas
   SaveActivity     suavizado, formato, guardar y compartir
-  AutoCutout       recorte de personas con ML Kit
+  AutoCutout       recorte automático con ML Kit (objetos; respaldo de personas)
 app/src/test/      pruebas del motor (en Android Studio: clic derecho en la carpeta › Run Tests)
 replica/           estudio de la app original, arquitectura y registro de construcción
 ```

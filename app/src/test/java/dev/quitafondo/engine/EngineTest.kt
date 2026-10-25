@@ -236,6 +236,59 @@ class EngineTest {
     }
 
     @Test
+    fun overBlendsLikeNormalCompositing() {
+        val opaqueRed = 0xFFFF0000.toInt()
+        assertEquals("opaco encima tapa todo", opaqueRed, ImageOps.over(white, 0x00FF0000, 255))
+        assertEquals("alfa 0 no cambia nada", white, ImageOps.over(white, red, 0))
+        assertEquals("sobre transparente conserva el alfa", (128 shl 24) or 0xFF0000, ImageOps.over(0, opaqueRed, 128))
+        val half = ImageOps.over(white, 0xFF000000.toInt(), 128)
+        assertEquals(255, half ushr 24)
+        val g = (half shr 8) and 0xFF
+        assertTrue("gris medio: $g", g in 120..135)
+    }
+
+    @Test
+    fun dilateGrowsMaskAndKeepsInside() {
+        val w = 40
+        val h = 40
+        val mask = ByteArray(w * h) { i -> if ((i % w) in 15..24 && (i / w) in 15..24) -1 else 0 }
+        val big = ImageOps.dilateMask(mask, w, h, 3)
+        val v = { x: Int, y: Int -> big[y * w + x].toInt() and 0xFF }
+        assertEquals(255, v(20, 20))
+        assertEquals("justo fuera queda dentro del borde", 255, v(13, 20))
+        assertEquals("lejos sigue transparente", 0, v(2, 20))
+    }
+
+    @Test
+    fun renderComposesBackgroundOutlineAndSubject() {
+        val s = squareImage()
+        Stroke(s, Tool.COLOR, 200f, 20).apply { begin(1f, 1f); end() }
+        val rect = IntRect(25, 25, 75, 75)
+        val bgColor = 0xFF2040E0.toInt()
+        val bg = IntArray(rect.width * rect.height) { bgColor }
+        val outline = ImageOps.dilateMask(s.alpha, s.width, s.height, 2)
+        val out = ImageOps.render(s, s.alpha, rect, bg, outline, 0xFFFFFF)
+        val px = { x: Int, y: Int -> out[(y - rect.top) * rect.width + (x - rect.left)] }
+        assertEquals("centro: la foto", red, px(50, 50))
+        assertEquals("esquina: el fondo", bgColor, px(26, 26))
+        assertEquals("junto al cuadrado: borde blanco", white, px(28, 50))
+        // Sin fondo ni borde el exterior queda transparente.
+        val plain = ImageOps.render(s, s.alpha, rect, null, null, 0)
+        assertEquals(0, plain[0] ushr 24)
+    }
+
+    @Test
+    fun blurRgbAveragesNeighbours() {
+        val w = 9
+        val px = IntArray(w) { if (it == 4) 0xFFFFFFFF.toInt() else 0xFF000000.toInt() }
+        val out = ImageOps.blurRgb(px, w, 1, 1)
+        assertEquals(255, out[4] ushr 24)
+        assertTrue(((out[4] shr 16) and 0xFF) in 1..254)
+        assertTrue(((out[3] shr 16) and 0xFF) in 1..254)
+        assertEquals(0, (out[0] shr 16) and 0xFF)
+    }
+
+    @Test
     fun strokeAtImageBorderDoesNotCrash() {
         val s = squareImage()
         listOf(Tool.REPAIR, Tool.MAGIC, Tool.COLOR, Tool.MANUAL).forEach { t ->

@@ -5,7 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -18,6 +21,11 @@ import dev.quitafondo.engine.EditorState
 import dev.quitafondo.engine.IntRect
 import dev.quitafondo.engine.Stroke
 import dev.quitafondo.engine.Tool
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
+import kotlin.coroutines.resume
 import kotlin.math.hypot
 
 /**
@@ -26,13 +34,17 @@ import kotlin.math.hypot
  * Un dedo dibuja con la herramienta activa. El punto que borra está [cursorOffsetPx] por encima del dedo
  * para que el dedo no tape lo que se borra. Dos dedos acercan y mueven la imagen; si el segundo dedo
  * llega a mitad de un trazo, ese trazo se deshace.
+ *
+ * Los cálculos de borrado (sobre todo el relleno de Mágico) corren en un hilo propio, en orden.
+ * El hilo principal solo copia a la pantalla la zona que cambió, como mucho una vez por fotograma,
+ * así el dibujo no se congela aunque el cálculo vaya por detrás del dedo.
  */
 class EraserView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
 
-    /** Avisa cuando cambia el historial (para activar o desactivar Deshacer y Rehacer). */
+    /** Avisa (en el hilo principal) cuando cambia el historial, para Deshacer y Rehacer. */
     var onHistoryChanged: (() -> Unit)? = null
 
     var tool: Tool = Tool.MANUAL
@@ -64,9 +76,19 @@ class EraserView @JvmOverloads constructor(
     var previewCursor: Boolean = false
         set(value) { field = value; invalidate() }
 
+    /** Lupa junto al dedo mientras se dibuja. */
+    var magnifier: Boolean = true
+
     private var state: EditorState? = null
     private var display: Bitmap? = null
     private var pixelBuffer = IntArray(0)
+
+    // Zona de la imagen pendiente de copiar a pantalla. Lo escriben el hilo de trazos y el principal.
+    private val dirtyLock = Any()
+    private var pendingDirty: IntRect = IntRect.EMPTY
+
+    private var worker: ExecutorService = newWorker()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private val imageMatrix = Matrix()
     private val inverse = Matrix()
@@ -106,6 +128,21 @@ class EraserView @JvmOverloads constructor(
     }
     private val dotRadius = context.dimen(R.dimen.cursor_dot)
 
+    private val magRadius = context.dimen(R.dimen.magnifier_radius)
+    private val magMargin = context.dimen(R.dimen.space_m)
+    private val magPath = Path()
+    private val magMatrix = Matrix()
+    private val magBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = context.dimen(R.dimen.magnifier_border)
+        color = context.color(R.color.cursor_ring)
+    }
+    private val magBorderShadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = context.dimen(R.dimen.magnifier_border) * 2f
+        color = context.color(R.color.cursor_shadow)
+    }
+
     fun setState(s: EditorState) {
         state = s
         display?.recycle()
@@ -115,15 +152,42 @@ class EraserView @JvmOverloads constructor(
         fit()
     }
 
-    /** Vuelve a pintar la zona [r] de la imagen desde la máscara. */
+    /** Marca la zona [r] de la imagen para volver a pintarla desde la máscara. Se puede llamar desde cualquier hilo. */
     fun refresh(r: IntRect?) {
+        if (r == null || r.isEmpty) return
+        synchronized(dirtyLock) { pendingDirty = pendingDirty.union(r) }
+        postInvalidateOnAnimation()
+    }
+
+    /** Copia a pantalla lo pendiente. Solo en el hilo principal, justo antes de dibujar. */
+    private fun flushDirty() {
         val s = state ?: return
         val bmp = display ?: return
-        if (r != null && !r.isEmpty) {
-            s.composite(pixelBuffer, r)
-            bmp.setPixels(pixelBuffer, r.top * s.width + r.left, s.width, r.left, r.top, r.width, r.height)
+        val r = synchronized(dirtyLock) {
+            val d = pendingDirty
+            pendingDirty = IntRect.EMPTY
+            d
         }
-        invalidate()
+        if (r.isEmpty) return
+        s.composite(pixelBuffer, r)
+        bmp.setPixels(pixelBuffer, r.top * s.width + r.left, s.width, r.left, r.top, r.width, r.height)
+    }
+
+    private fun submit(task: () -> Unit) {
+        try {
+            worker.execute(task)
+        } catch (_: RejectedExecutionException) {
+            // La vista ya se desmontó; no queda nada que dibujar.
+        }
+    }
+
+    /** Espera a que el hilo de trazos termine todo lo encolado (antes de leer o cambiar la máscara desde fuera). */
+    suspend fun awaitIdle() = suspendCancellableCoroutine<Unit> { cont ->
+        try {
+            worker.execute { cont.resume(Unit) }
+        } catch (_: RejectedExecutionException) {
+            cont.resume(Unit)
+        }
     }
 
     /** Deshace el trazo en curso, si lo hay (por ejemplo, si otro dedo pulsa Deshacer a la vez). */
@@ -131,21 +195,26 @@ class EraserView @JvmOverloads constructor(
         val st = stroke ?: return
         stroke = null
         mode = Mode.NONE
-        refresh(st.cancel())
+        submit { refresh(st.cancel()) }
+        invalidate()
     }
 
     fun undo() {
         cancelStroke()
         val s = state ?: return
-        refresh(s.history.undo(s.alpha, s.width))
-        onHistoryChanged?.invoke()
+        submit {
+            refresh(s.history.undo(s.alpha, s.width))
+            mainHandler.post { onHistoryChanged?.invoke() }
+        }
     }
 
     fun redo() {
         cancelStroke()
         val s = state ?: return
-        refresh(s.history.redo(s.alpha, s.width))
-        onHistoryChanged?.invoke()
+        submit {
+            refresh(s.history.redo(s.alpha, s.width))
+            mainHandler.post { onHistoryChanged?.invoke() }
+        }
     }
 
     /** Ajusta la imagen completa a la vista. */
@@ -165,12 +234,24 @@ class EraserView @JvmOverloads constructor(
         fit()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (worker.isShutdown) worker = newWorker()
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        stroke?.cancel()
+        val st = stroke
         stroke = null
+        mode = Mode.NONE
+        if (st != null) submit { st.cancel() }
+        worker.shutdown()
         display?.recycle()
         display = null
+    }
+
+    private fun newWorker(): ExecutorService = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "trazos").apply { priority = Thread.NORM_PRIORITY + 1 }
     }
 
     private fun currentScale(): Float {
@@ -200,26 +281,32 @@ class EraserView @JvmOverloads constructor(
     // ---------- Dibujo ----------
 
     override fun onDraw(canvas: Canvas) {
+        flushDirty()
         canvas.drawColor(outsideColor)
         val s = state ?: return
         val bmp = display ?: return
 
         imageBounds.set(0f, 0f, s.width.toFloat(), s.height.toFloat())
         imageMatrix.mapRect(imageBounds)
-        when (backdrop) {
-            Backdrop.CHECKER -> canvas.drawRect(imageBounds, checker)
-            Backdrop.WHITE -> canvas.drawRect(imageBounds, solidPaint.apply { color = context.color(R.color.backdrop_white) })
-            Backdrop.GRAY -> canvas.drawRect(imageBounds, solidPaint.apply { color = context.color(R.color.backdrop_gray) })
-            Backdrop.BLACK -> canvas.drawRect(imageBounds, solidPaint.apply { color = context.color(R.color.backdrop_black) })
-        }
+        canvas.drawRect(imageBounds, backdropPaint())
         // De cerca se ven los píxeles tal cual, para poder afinar.
         bitmapPaint.isFilterBitmap = currentScale() < 3f
         canvas.drawBitmap(bmp, imageMatrix, bitmapPaint)
 
         when {
-            mode == Mode.DRAW -> drawCursor(canvas, fingerX, fingerY)
+            mode == Mode.DRAW -> {
+                drawCursor(canvas, fingerX, fingerY)
+                if (magnifier) drawMagnifier(canvas, bmp, fingerX, fingerY - cursorOffsetPx)
+            }
             previewCursor -> drawCursor(canvas, width / 2f, height / 2f + cursorOffsetPx / 2f)
         }
+    }
+
+    private fun backdropPaint(): Paint = when (backdrop) {
+        Backdrop.CHECKER -> checker
+        Backdrop.WHITE -> solidPaint.apply { color = context.color(R.color.backdrop_white) }
+        Backdrop.GRAY -> solidPaint.apply { color = context.color(R.color.backdrop_gray) }
+        Backdrop.BLACK -> solidPaint.apply { color = context.color(R.color.backdrop_black) }
     }
 
     private fun drawCursor(canvas: Canvas, fx: Float, fy: Float) {
@@ -236,6 +323,29 @@ class EraserView @JvmOverloads constructor(
         canvas.drawCircle(tx, ty, dotRadius, targetPaint)
     }
 
+    /** Círculo ampliado en la esquina superior opuesta al dedo, centrado en el punto que borra. */
+    private fun drawMagnifier(canvas: Canvas, bmp: Bitmap, tx: Float, ty: Float) {
+        val r = magRadius
+        val cx = if (tx < width / 2f) width - r - magMargin else r + magMargin
+        val cy = r + magMargin
+        canvas.save()
+        magPath.reset()
+        magPath.addCircle(cx, cy, r, Path.Direction.CW)
+        canvas.clipPath(magPath)
+        canvas.drawRect(cx - r, cy - r, cx + r, cy + r, backdropPaint())
+        magMatrix.set(imageMatrix)
+        magMatrix.postScale(MAGNIFICATION, MAGNIFICATION, tx, ty)
+        magMatrix.postTranslate(cx - tx, cy - ty)
+        canvas.drawBitmap(bmp, magMatrix, bitmapPaint)
+        val ring = cursorRadiusOnScreen() * MAGNIFICATION
+        canvas.drawCircle(cx, cy, ring, ringShadow)
+        canvas.drawCircle(cx, cy, ring, ringPaint)
+        canvas.drawCircle(cx, cy, dotRadius, targetPaint)
+        canvas.restore()
+        canvas.drawCircle(cx, cy, r, magBorderShadow)
+        canvas.drawCircle(cx, cy, r, magBorder)
+    }
+
     // ---------- Toques ----------
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -248,16 +358,16 @@ class EraserView @JvmOverloads constructor(
                 fingerX = event.x
                 fingerY = event.y
                 val p = toImage(fingerX, fingerY - cursorOffsetPx)
+                val x = p[0]
+                val y = p[1]
                 val st = Stroke(s, tool, brushRadiusInImage(), tolerance)
                 stroke = st
-                refresh(st.begin(p[0], p[1]))
+                submit { refresh(st.begin(x, y)) }
+                invalidate()
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
-                if (mode == Mode.DRAW) {
-                    refresh(stroke?.cancel())
-                    stroke = null
-                }
+                if (mode == Mode.DRAW) cancelStroke()
                 mode = Mode.GESTURE
                 startGesture(event, skipIndex = -1)
                 invalidate()
@@ -266,15 +376,29 @@ class EraserView @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> when (mode) {
                 Mode.DRAW -> {
                     val st = stroke ?: return true
-                    // Usa también los puntos intermedios que el sistema agrupa en un mismo evento.
-                    for (h in 0 until event.historySize) {
+                    // Incluye los puntos intermedios que el sistema agrupa en un mismo evento.
+                    val n = event.historySize
+                    val pts = FloatArray((n + 1) * 2)
+                    for (h in 0 until n) {
                         val p = toImage(event.getHistoricalX(h), event.getHistoricalY(h) - cursorOffsetPx)
-                        refresh(st.moveTo(p[0], p[1]))
+                        pts[h * 2] = p[0]
+                        pts[h * 2 + 1] = p[1]
                     }
                     fingerX = event.x
                     fingerY = event.y
                     val p = toImage(fingerX, fingerY - cursorOffsetPx)
-                    refresh(st.moveTo(p[0], p[1]))
+                    pts[n * 2] = p[0]
+                    pts[n * 2 + 1] = p[1]
+                    submit {
+                        var dirty = IntRect.EMPTY
+                        var i = 0
+                        while (i < pts.size) {
+                            dirty = dirty.union(st.moveTo(pts[i], pts[i + 1]))
+                            i += 2
+                        }
+                        refresh(dirty)
+                    }
+                    invalidate()
                 }
                 Mode.GESTURE -> updateGesture(event)
                 Mode.NONE -> Unit
@@ -286,9 +410,14 @@ class EraserView @JvmOverloads constructor(
 
             MotionEvent.ACTION_UP -> {
                 if (mode == Mode.DRAW) {
-                    stroke?.end()
+                    val st = stroke
                     stroke = null
-                    onHistoryChanged?.invoke()
+                    if (st != null) {
+                        submit {
+                            st.end()
+                            mainHandler.post { onHistoryChanged?.invoke() }
+                        }
+                    }
                 } else if (mode == Mode.GESTURE && currentScale() < fitScale) {
                     fit()
                 }
@@ -297,8 +426,7 @@ class EraserView @JvmOverloads constructor(
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                refresh(stroke?.cancel())
-                stroke = null
+                cancelStroke()
                 mode = Mode.NONE
                 invalidate()
             }
@@ -378,6 +506,7 @@ class EraserView @JvmOverloads constructor(
 
     private companion object {
         /** Radio máximo del modo Mágico en píxeles de imagen. */
-        const val MAGIC_MAX_RADIUS = 320f
+        const val MAGIC_MAX_RADIUS = 256f
+        const val MAGNIFICATION = 2.5f
     }
 }

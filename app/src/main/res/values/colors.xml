@@ -30,4 +30,19 @@
     <color name="scrim">#CC0E1013</color>
 
     <color name="launcher_bg">#FF7A52</color>
+
+    <!-- Paleta de fondos al guardar -->
+    <color name="swatch_1">#F7F3EA</color>
+    <color name="swatch_2">#D9D9D9</color>
+    <color name="swatch_3">#2B2B2B</color>
+    <color name="swatch_4">#FF7A52</color>
+    <color name="swatch_5">#FFC857</color>
+    <color name="swatch_6">#7BD389</color>
+    <color name="swatch_7">#2A9D8F</color>
+    <color name="swatch_8">#4EA8DE</color>
+    <color name="swatch_9">#3A5BA0</color>
+    <color name="swatch_10">#9B5DE5</color>
+    <color name="swatch_11">#F15BB5</color>
+    <color name="swatch_12">#E63946</color>
+    <color name="outline_default">#FFFFFF</color>
 </resources>

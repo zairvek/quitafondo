@@ -153,14 +153,14 @@
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/toolPerson"
+            android:id="@+id/toolAuto"
             style="@style/Quitafondo.ToolButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/space_s"
             android:layout_weight="1"
-            android:text="@string/tool_person"
-            app:icon="@drawable/ic_tool_person" />
+            android:text="@string/tool_auto"
+            app:icon="@drawable/ic_tool_auto" />
     </LinearLayout>
 </LinearLayout>
 

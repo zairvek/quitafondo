@@ -7,8 +7,8 @@
     <string name="home_subtitle">Borra el fondo y guarda un PNG transparente para pegatinas, montajes o tu tienda.</string>
     <string name="home_pick">Elegir foto</string>
     <string name="home_step_1">1. Elige una foto y encuadra lo que quieres.</string>
-    <string name="home_step_2">2. Borra el fondo con el dedo. Mágico y Color hacen casi todo solos.</string>
-    <string name="home_step_3">3. Suaviza el borde y guarda.</string>
+    <string name="home_step_2">2. Pulsa Auto para recortar el objeto, o borra el fondo con el dedo.</string>
+    <string name="home_step_3">3. Elige un fondo, suaviza el borde y guarda.</string>
     <string name="loading_photo">Abriendo la foto…</string>
     <string name="error_load">No pude abrir esa foto. Prueba con otra.</string>
     <string name="error_memory">La foto es demasiado grande para este teléfono.</string>
@@ -32,12 +32,14 @@
     <string name="tool_magic">Mágico</string>
     <string name="tool_color">Color</string>
     <string name="tool_repair">Reparar</string>
-    <string name="tool_person">Persona</string>
+    <string name="tool_auto">Auto</string>
     <string name="slider_size">Tamaño</string>
     <string name="slider_offset">Distancia</string>
     <string name="slider_tolerance">Parecido</string>
     <string name="finding_edges">Buscando bordes…</string>
-    <string name="finding_person">Buscando a la persona…</string>
+    <string name="finding_subject">Recortando…</string>
+    <string name="no_subject">No encontré un objeto claro. Prueba con Mágico o Color.</string>
+    <string name="model_fallback">El reconocimiento de objetos aún no está listo en este teléfono; recorté a la persona.</string>
     <string name="no_person">No encontré a nadie en la foto. Prueba con Mágico o Color.</string>
     <string name="person_failed">No se pudo hacer el recorte automático.</string>
     <string name="discard_title">¿Salir del editor?</string>
@@ -51,6 +53,15 @@
     <string name="hint_zoom">Dos dedos para acercar y moverte.</string>
 
     <!-- Guardar -->
+    <string name="background">Fondo</string>
+    <string name="bg_transparent">Transparente</string>
+    <string name="bg_white">Blanco</string>
+    <string name="bg_black">Negro</string>
+    <string name="bg_color">Color…</string>
+    <string name="bg_blur">Desenfoque</string>
+    <string name="bg_photo">Foto…</string>
+    <string name="pick_color">Elige un color</string>
+    <string name="outline">Borde</string>
     <string name="save_title">Guardar</string>
     <string name="smooth_edge">Suavizar</string>
     <string name="trim">Quitar el espacio vacío alrededor</string>

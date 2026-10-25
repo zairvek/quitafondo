@@ -38,3 +38,13 @@ Corregido tras la revisión:
 9. Mágico limita su radio a 320 píxeles de imagen para que el dibujo no se vuelva lento; el cursor muestra ese límite.
 10. Barras del sistema configuradas después de `super.onCreate`.
 11. Quitafondo ya no aparece en su propio menú de compartir.
+
+## Versión 2 (2026-10-25, tras la primera prueba en un teléfono)
+
+Reporte del usuario: Mágico daba tirones en fotos grandes. Causa: el relleno se calculaba en el hilo que dibuja.
+
+- Los trazos se procesan ahora en un hilo propio y en orden; la pantalla se actualiza como mucho una vez por fotograma. Mágico da pasos el doble de grandes (los rellenos se solapan) y su radio máximo bajó a 256 px.
+- Nuevo: lupa junto al dedo mientras se dibuja.
+- Nuevo: botón **Auto** con el modelo de objetos de ML Kit (cualquier cosa) y respaldo del modelo de personas si el primero no está disponible.
+- Nuevo al guardar: fondo (transparente, blanco, negro, 12 colores, desenfoque de la misma foto, otra foto) y borde de pegatina.
+- Motor: `over`, `dilateMask`, `blurRgb` y `render` con pruebas (24 en total).

@@ -76,7 +76,8 @@ class Stroke(
     fun moveTo(x: Float, y: Float): IntRect {
         check(started && !finished)
         val dist = hypot(x - lastX, y - lastY)
-        val step = max(1f, radius * 0.25f)
+        // Los rellenos de Mágico se solapan mucho; con la mitad de pasos queda igual y cuesta la mitad.
+        val step = max(1f, radius * if (tool == Tool.MAGIC) 0.5f else 0.25f)
         val n = ceil(dist / step).toInt()
         var dirty = IntRect.EMPTY
         for (i in 1..n) {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores de fondo que se ofrecen al guardar. -->
+    <integer-array name="background_colors">
+        <item>@color/swatch_1</item>
+        <item>@color/swatch_2</item>
+        <item>@color/swatch_3</item>
+        <item>@color/swatch_4</item>
+        <item>@color/swatch_5</item>
+        <item>@color/swatch_6</item>
+        <item>@color/swatch_7</item>
+        <item>@color/swatch_8</item>
+        <item>@color/swatch_9</item>
+        <item>@color/swatch_10</item>
+        <item>@color/swatch_11</item>
+        <item>@color/swatch_12</item>
+    </integer-array>
+</resources>

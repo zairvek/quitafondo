@@ -57,6 +57,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     // Recorte automático de personas, modelo incluido en la app (funciona sin conexión).
     implementation("com.google.mlkit:segmentation-selfie:16.0.0-beta6")
+    // Recorte de cualquier objeto. El modelo lo descarga Google Play Services al instalar.
+    implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
 
     testImplementation("junit:junit:4.13.2")
 }
